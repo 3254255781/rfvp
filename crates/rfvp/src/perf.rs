@@ -8,10 +8,37 @@ use core::sync::atomic::{AtomicU32, AtomicUsize, Ordering};
 static CLOCK: AtomicUsize = AtomicUsize::new(0);
 
 /// The stages that are measured.
-pub const STAGES: [&str; 22] = [
+pub const STAGES: [&str; 34] = [
     "text", "alpha", "move", "rotation", "scale", "z", "v3d", "anim", "parts", "snow",
     "dissolve", "tree", "submit", "end_frame", "text_tick", "text_raster", "audio_mix", "vm", "audio_cmds", "save", "syscalls", "vm_snapshot",
+    "vfs_read", "graph_decode", "parts_decode", "parts_compose", "cpu_restore",
+    "psv_texture", "psv_resize", "psv_gpu_upload", "main_audio_lock",
+    "psv_thumbnail", "save_snapshot", "save_finalize",
 ];
+
+pub fn enabled() -> bool {
+    CLOCK.load(Ordering::Relaxed) != 0
+}
+
+/// A scoped measurement, including early returns. Stages may be nested: do not add them up.
+pub struct Scope(usize, u64);
+
+pub fn scope(stage: usize) -> Scope {
+    Scope(stage, start())
+}
+
+impl Drop for Scope {
+    fn drop(&mut self) {
+        stop(self.0, self.1);
+    }
+}
+
+/// Main-thread diagnostic events only; never call the logger under the audio mixer lock.
+pub fn event(args: core::fmt::Arguments<'_>) {
+    if enabled() {
+        log::info!("[diag t={}us] {}", start(), args);
+    }
+}
 
 static TOTALS: [AtomicU32; STAGES.len()] = [const { AtomicU32::new(0) }; STAGES.len()];
 
