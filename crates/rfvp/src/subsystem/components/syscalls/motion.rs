@@ -1,4 +1,4 @@
-#[cfg(feature = "no_std")]
+﻿#[cfg(feature = "no_std")]
 use alloc::{
     boxed::Box,
     format,
@@ -7,6 +7,7 @@ use alloc::{
     vec::Vec,
 };
 use anyhow::Result;
+use core::sync::atomic::{AtomicU32, Ordering};
 
 use crate::script::Variant;
 use crate::subsystem::resources::motion_manager::AlphaMotionType;
@@ -30,6 +31,24 @@ fn int_or_default(v: &Variant, default: i32) -> i32 {
         Variant::Int(x) => *x,
         Variant::Nil => default,
         _ => default,
+    }
+}
+
+static INVALID_ALPHA: AtomicU32 = AtomicU32::new(0);
+static INVALID_MOVE: AtomicU32 = AtomicU32::new(0);
+static INVALID_ROTATION: AtomicU32 = AtomicU32::new(0);
+static INVALID_SCALE: AtomicU32 = AtomicU32::new(0);
+static INVALID_Z: AtomicU32 = AtomicU32::new(0);
+static INVALID_V3D: AtomicU32 = AtomicU32::new(0);
+
+/// Keep the old error severity, but add action/prim/value and a bounded count. The first
+/// three and every hundredth event per action are printed; the rest are counted only.
+fn invalid_duration(action: &str, counter: &AtomicU32, id: i16, duration: &Variant) {
+    let count = counter.fetch_add(1, Ordering::Relaxed) + 1;
+    if count <= 3 || count % 100 == 0 {
+        log::error!(
+            "motion invalid duration action={action} prim={id} value={duration:?} count={count}"
+        );
     }
 }
 
@@ -70,10 +89,11 @@ pub fn motion_alpha(
         _ => current_alpha,
     };
 
-    let duration = match duration {
+    let duration_arg = duration;
+    let duration = match duration_arg {
         Variant::Int(duration) => *duration,
         _ => {
-            log::error!("Invalid duration");
+            invalid_duration("motion_alpha", &INVALID_ALPHA, id, duration_arg);
             return Ok(Variant::Nil);
         }
     };
@@ -199,10 +219,11 @@ pub fn motion_move(
         dst_y = scale_i16(game_data, dst_y);
     }
 
-    let duration = match duration {
+    let duration_arg = duration;
+    let duration = match duration_arg {
         Variant::Int(duration) => *duration,
         _ => {
-            log::error!("Invalid duration");
+            invalid_duration("motion_move", &INVALID_MOVE, id, duration_arg);
             return Ok(Variant::Nil);
         }
     };
@@ -320,10 +341,11 @@ pub fn motion_move_r(
             .get_rotation(),
     };
 
-    let duration = match duration {
+    let duration_arg = duration;
+    let duration = match duration_arg {
         Variant::Int(duration) => *duration,
         _ => {
-            log::error!("Invalid duration");
+            invalid_duration("motion_move_r", &INVALID_ROTATION, id, duration_arg);
             return Ok(Variant::Nil);
         }
     };
@@ -464,10 +486,11 @@ pub fn motion_move_s2(
             .into(),
     };
 
-    let duration = match duration {
+    let duration_arg = duration;
+    let duration = match duration_arg {
         Variant::Int(duration) => *duration,
         _ => {
-            log::error!("Invalid duration");
+            invalid_duration("motion_move_s2", &INVALID_SCALE, id, duration_arg);
             return Ok(Variant::Nil);
         }
     };
@@ -587,10 +610,11 @@ pub fn motion_move_z(
             .into(),
     };
 
-    let duration = match duration {
+    let duration_arg = duration;
+    let duration = match duration_arg {
         Variant::Int(duration) => *duration,
         _ => {
-            log::error!("Invalid duration");
+            invalid_duration("motion_move_z", &INVALID_Z, id, duration_arg);
             return Ok(Variant::Nil);
         }
     };
@@ -733,10 +757,11 @@ pub fn v3d_motion(
         }
     };
 
-    let duration = match duration {
+    let duration_arg = duration;
+    let duration = match duration_arg {
         Variant::Int(duration) => *duration,
         _ => {
-            log::error!("Invalid duration");
+            invalid_duration("v3d_motion", &INVALID_V3D, -1, duration_arg);
             return Ok(Variant::Nil);
         }
     };
@@ -827,12 +852,12 @@ pub fn v3d_set(game_data: &mut GameData, x: &Variant, y: &Variant, z: &Variant) 
 
 /// Start an alpha animation on a primitive (fade/tween).
 ///
-/// Arg1: primitive index (1–4095)
-/// Arg2: src_alpha (0–255, optional)
+/// Arg1: primitive index (1閳?095)
+/// Arg2: src_alpha (0閳?55, optional)
 ///       - starting alpha; if omitted or invalid, uses current prim.m_Alpha
-/// Arg3: dest_alpha (0–255, optional)
+/// Arg3: dest_alpha (0閳?55, optional)
 ///       - target alpha; if omitted or invalid, uses current prim.m_Alpha
-/// Arg4: duration (ms) (1–300000)
+/// Arg4: duration (ms) (1閳?00000)
 ///       - animation length in milliseconds
 /// Arg5: type (0 or 1, optional)
 ///       - 0 = Linear interpolation (default)
@@ -882,7 +907,7 @@ unsafe impl Sync for MotionAlpha {}
 
 /// Stop the alpha animation with a primitive index
 ///
-/// Arg1: primitive index (1–4095)
+/// Arg1: primitive index (1閳?095)
 /// Behavior:
 /// - The function has no return value
 pub struct MotionAlphaStop;
@@ -899,7 +924,7 @@ unsafe impl Sync for MotionAlphaStop {}
 
 /// Test whether a primitive currently has a running alpha animation.
 ///
-/// Arg1: primitive index (1–4095)
+/// Arg1: primitive index (1閳?095)
 ///
 /// Behavior:
 /// - Queries the alpha motion container (`alpha_motion_is_running`) for the specified prim.

@@ -1,0 +1,469 @@
+{
+  "build": "rfvp-psv-diag-20261022-17",
+  "base_commit": "709b6ba2f9ae4ba9f34c56df82a044eb958ff329",
+  "vpk_bytes": 1180657,
+  "vpk_sha256": "f608706eb0cd0aa7bfd216fa4ee2980831b0866f01f7ad25134d5a3031fc38e2",
+  "eboot_sha256": "fcbf148a6c4c00327e668f41d0beca3c67733d3875a5d48c63728b3f20aa8d18",
+  "modified_source_files": [
+    {
+      "path": "crates/rfvp/Cargo.toml",
+      "sha256": "b199d83f07a51a24035976fb31e87df60d62a4493ab95cb462d4142f0f5e824c"
+    },
+    {
+      "path": "crates/rfvp/build.rs",
+      "sha256": "8e8b161cda4176213be9abc835f9be58d94fbf3388e6218030ca3505464668f6"
+    },
+    {
+      "path": "crates/rfvp/src/audio_player/channels.rs",
+      "sha256": "1e78347c59fba4b2df37ebe876d593560618e0c6f52f3c2d922dc3f99a8bc5b5"
+    },
+    {
+      "path": "crates/rfvp/src/game_config.rs",
+      "sha256": "6493cf9db68e7502968e790f1309f86f4fc50973a53e417ce2c008de743a43ac"
+    },
+    {
+      "path": "crates/rfvp/src/host_api/render.rs",
+      "sha256": "ba00b8ee3f1f0208b809b28b23d24d07ed56a1abc3e234bdf7973612ae02de68"
+    },
+    {
+      "path": "crates/rfvp/src/lib.rs",
+      "sha256": "cd5e77482f74b061d97ebe4377d2085f83f9bd8127a8a9775447f3c9b3628dac"
+    },
+    {
+      "path": "crates/rfvp/src/no_std_core.rs",
+      "sha256": "6869b4c9453b28b63aa234866f3cd0bff4708f9e97b07f11133e956386418842"
+    },
+    {
+      "path": "crates/rfvp/src/perf.rs",
+      "sha256": "4c6c97058fd7836e4138a45643b943820ec61477397800c1d0acbf6fbfa87fe6"
+    },
+    {
+      "path": "crates/rfvp/src/rendering/prim_commands.rs",
+      "sha256": "765645296f859f402d7d8b25ce1a8973221b46f5bfb9b2b2ce2da69b3339d37f"
+    },
+    {
+      "path": "crates/rfvp/src/rfvp_audio/commands.rs",
+      "sha256": "b9ae2df8da08345ce532bb9e7a6738d17aba7f9092cb3a22c44f3a693795b8c5"
+    },
+    {
+      "path": "crates/rfvp/src/ring_log.rs",
+      "sha256": "b134745fa51d2c44f5af16e1bbfaf853d9dc72fb34321d74e67d7da58c0a3b27"
+    },
+    {
+      "path": "crates/rfvp/src/script/mod.rs",
+      "sha256": "3dd1230d75cee1202841df16493468cc8d5f188452a77117c45d27805fe06dad"
+    },
+    {
+      "path": "crates/rfvp/src/script/parser.rs",
+      "sha256": "1b2dc380f164e4ea1aa2d73737cb034475713c8b9d99febb0caca0e0c5e4656e"
+    },
+    {
+      "path": "crates/rfvp/src/script/text_patch.rs",
+      "sha256": "1a25c877419424a5d8c2b1d87926c8b683de90069dc8e2a451749bc08a11d9a2"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/components/syscalls/motion.rs",
+      "sha256": "56f45e85ff574f16c6b4878731022c207fd0a5a803aadecfa1a62094ab65d3a7"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/components/syscalls/parts.rs",
+      "sha256": "4570876f81aac77a7030dd1c3b17fff606f1e92fc94103d90e66760d8901391e"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/components/syscalls/sound.rs",
+      "sha256": "4fea56ae4f991949156cadd8b08e40af73108212d744f4ade5c2a87ab8426733"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/graph_buff.rs",
+      "sha256": "73cfbcaeacb6f988e2366ffe654672541a2a3efbbe0a33c5d238adcabf00e6a4"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/input_manager.rs",
+      "sha256": "ff3516b53e801faa844dfe56fa16954244b7a9d8e651c06821cbc26cae3579c3"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/motion_manager/mod.rs",
+      "sha256": "8b209820a18a8f445d3e2be1ced3edfebb01b2d87091bac06934b87ac7ae0301"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/parts_manager.rs",
+      "sha256": "9654d3199ea8b8c7503df8f17cae2feec955f10df06fb03409b4f3c5955a4a1f"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/prim.rs",
+      "sha256": "088d93ad1dc80ad5de60a75700110c3991d94ae0c278830a649f7737cf8c476d"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/save_manager.rs",
+      "sha256": "27f2b3966caa9a7ea12aa4f49d31ada37156b165e1e97a7699b0b9dd0d731dc9"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/text_manager.rs",
+      "sha256": "4592fc47d4b861e192d27173da955d70130fd4f40983cea5b1f938f2cd04c61a"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/texture.rs",
+      "sha256": "fd28f74ec53a31cd185429b41aa001eacc45b2dec4f2f83d0cf6eb5f38ce25f4"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/thread_wrapper.rs",
+      "sha256": "d7801fae10d9fcf4d6e9f045667e3121f7a85f3a8073c055066da87d84336354"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/resources/vfs.rs",
+      "sha256": "5f6ce9c3a2bbd102b6e924692ed8480a4fb0429e807bce0e2fbd46c5d18de195"
+    },
+    {
+      "path": "crates/rfvp/src/subsystem/save_state.rs",
+      "sha256": "40eebeed62015713525ab510ebe1af53be75d7c54d444955363d4ef7e6922ae4"
+    },
+    {
+      "path": "crates/rfvp/src/vm_runner.rs",
+      "sha256": "01897bb511a38a077032776d9fe34f052ae20f4eb08e0f311557547182190f53"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/common_defs.h",
+      "sha256": "fe0dfdb4dadf413fcac6d011f678e644127f2361fbf46181bafb4f6c4265814c"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/adler32.c",
+      "sha256": "63099826db3ddf84c15bfba30940f9689917185df8c30ff27a2bc2b7cb6a19f2"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/arm/adler32_impl.h",
+      "sha256": "b7e43d7b91db98d774243cf29ee41941edf93e71b5a3f5cc3ede34d8b70a93d9"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/arm/cpu_features.c",
+      "sha256": "ab7fb53d8b5b991200e986f20b66f71549a28bbe54b904f37ef81a4696780048"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/arm/cpu_features.h",
+      "sha256": "0cff5c0110021dc8b18511e328f913f1bad21f31ad927497d1f428db4e6ed239"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/arm/crc32_impl.h",
+      "sha256": "5a24f5087e665b30516f83c2e09a58ed01dab867895a6cefc2f1c833d12482d3"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/arm/crc32_pmull_helpers.h",
+      "sha256": "e469001ad29607cab992ae29c9eaac331427d6b103d11d58d37158b3aa0be95c"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/arm/crc32_pmull_wide.h",
+      "sha256": "c53a58d1e3dc5e75d23c1338fed6cc431ee6fbdfcd4ac94f576579258ac34a88"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/arm/matchfinder_impl.h",
+      "sha256": "11cd6a9c47d2dadf746f7a944c72c672b40bc83b2ffb43356e0b7ced6b6b8038"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/bt_matchfinder.h",
+      "sha256": "6e3834eb2de5c759479bbdab9471f3569f8aa2bcbba81f4f917c84ebff0050ad"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/cpu_features_common.h",
+      "sha256": "f4eb0800558e9116dd14446ccfb9b1896f970aec6de42c18366a29bde73fd0da"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/crc32.c",
+      "sha256": "91d0155e5e879527f9a5dbc53f01ea2400fbb80a75b9dda71d867cdd53d18cca"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/crc32_multipliers.h",
+      "sha256": "4685f86b4035627d81c802627d8148ac17861ede15d2af741f06c66022a4c4d0"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/crc32_tables.h",
+      "sha256": "2aa0c8590795ab7d2722bdcd1be816d4808b6e7d301b52bd5ed4c5c1c72b996e"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/decompress_template.h",
+      "sha256": "ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/deflate_compress.c",
+      "sha256": "a46dae12f2020b68d20c965ae43f9710e3e792bf77f3ca4611582f8d8d0c9541"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/deflate_compress.h",
+      "sha256": "cd3a74bb22e5358e9571184294b1f3600e2a72bde483485eda242a92bb7124b0"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/deflate_constants.h",
+      "sha256": "72ea6e5f0abe53e781203e3f383603a765a768b860a09b3356be36bfd87c8af3"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/deflate_decompress.c",
+      "sha256": "f4299b3a688b5768c3a8790339e47e02a6e6247d3675b0fafe412a1fc9bd995f"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/gzip_compress.c",
+      "sha256": "b92016cf6a5ce34b48e6950d7de68923d2e5e0475bbe4c71297360818deafb08"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/gzip_constants.h",
+      "sha256": "135661faa24f45407517f9f73380cf89890613aeba27b3a4f5cfba0e74e85ae0"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/gzip_decompress.c",
+      "sha256": "f853b8802a1b7e79f6626f0a2c104d005958288c2a37ea24df758ee54f714304"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/hc_matchfinder.h",
+      "sha256": "b37e8c48957f8d7773a847a1d5a5fe5343b85e0f9c43ddce2e55eb24d58a1704"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/ht_matchfinder.h",
+      "sha256": "a682872f0d05919e13d53b49df42039062c177c65d19095da958162425883c0c"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/lib_common.h",
+      "sha256": "e7aa1f2750434e1019ffabda577dab0fdf5b95f010f6f20aa7e21323b3bcceea"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/matchfinder_common.h",
+      "sha256": "47199708cd30c44772fbaed3da4b34533541d6f33ffa7279651a137887756ab3"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/riscv/matchfinder_impl.h",
+      "sha256": "e487458fdc957ba59f9f6d27d6f8997900446df08880018b00d5535a7fc5edc2"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/utils.c",
+      "sha256": "3d4c9f6d488610d4d9ff314b2dc783e24079325b78af13d3ee37b18fcc0b0d8a"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/x86/adler32_impl.h",
+      "sha256": "952c36cd1518d2c0d52d2c1b7ed26c7c32621095f0aaf848bfa0ef42b8299b5c"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/x86/adler32_template.h",
+      "sha256": "8e5d14f8e596bd54bea188b6ff5c96649329beeebd9acdd59307a5202206d11e"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/x86/cpu_features.c",
+      "sha256": "9ed976e4c66478e8b6a8856424816147a971f75894c66f03274ab8119074dde0"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/x86/cpu_features.h",
+      "sha256": "1fa71a4fdf117120a08f3f46990b2cee5d3cbef0610d77fb40d19a0e5387807b"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/x86/crc32_impl.h",
+      "sha256": "ec93c97a3197459ea9d6fa4cb6d39ceeb5f5dd8f649a5f6edce0dccf6947c34c"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/x86/crc32_pclmul_template.h",
+      "sha256": "f0aa09cf49fd77e1f95c360f8edddd3a17725b8ea92f92c70efe50a182f51d72"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/x86/decompress_impl.h",
+      "sha256": "81ab9fd7d4723fdc7ae81dca82f817bcecb7baf5bdfffde0ccfbba70569ac2f1"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/x86/matchfinder_impl.h",
+      "sha256": "3322b5195e11dc08575ea26431d8d16514cb53bf25e6a9b6935b6cec7a678a27"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/zlib_compress.c",
+      "sha256": "b5ca0c9af0346fd656871441b08b73b3512601ceec8edc6cc81e8a93929081d4"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/zlib_constants.h",
+      "sha256": "562e16b83ac33ac6d351cdfdf1962750576080d65c22ab66cad0aaa33695bebb"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/lib/zlib_decompress.c",
+      "sha256": "704a57fb91c36c1c88b04a3482694de08c794ca0cb3904ac247a206802aa6ee0"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/libdeflate.h",
+      "sha256": "1bb50a3ff8c6980c1031c0e9bb324cf99df51379fdca77a358644cca841765cc"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/benchmark.c",
+      "sha256": "595345116350deda1f8cd7513dc983149d8febab577a7fe4fe3443f2d937183e"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/checksum.c",
+      "sha256": "b88efcc45a6780eab5077c8d895ff0404317ceb66e67b95ee5a55fa17e3202f2"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/gzip.c",
+      "sha256": "ffdc67ec68447240d6bedec5c1c5beda746cf83de33ea5fcdbaa54430e1bed65"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/prog_util.c",
+      "sha256": "4e6d1b1f3774e9b45b8819d70343aa3846eb7228fe333938ec0c9e9c83654081"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/prog_util.h",
+      "sha256": "5dc30a416c1223c854a9b90cc1a6fdbf38ef31fc9cee956bfd22639d6d60f14e"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_checksums.c",
+      "sha256": "19c7643a2690276694875b966f59a1bde46d581c14d25289c4652046e8ee33f4"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_custom_malloc.c",
+      "sha256": "c5e76e15a2eeb70cac1b0d61b858dce52ef92751f0ebba059dff2c214df8c80f"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_incomplete_codes.c",
+      "sha256": "e2c048cfe67b7ec54dc3c76327275734502853826fac66db5a3f81346afa32ca"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_invalid_streams.c",
+      "sha256": "5efdd78a010b7eeb747eccdf2425785f2091b20679022c5800270bf6efe1dd77"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_litrunlen_overflow.c",
+      "sha256": "5253a0031b57abc3ec20d26df900495a274169467703ef60b39ebde7645d1a9f"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_overread.c",
+      "sha256": "334ec984480acc11fc287f1a29521af03f4e96103c4b195b5f4879115a2025d8"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_slow_decompression.c",
+      "sha256": "cf4ed95d9e679814d104745599b630436cac26292debe79d84c8efa61f596013"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_trailing_bytes.c",
+      "sha256": "6e61e70ad214f9533a5e120ed4483e146b850e4ec9d1b913692d72304439b06e"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_util.c",
+      "sha256": "f27d8e0b0000a054fb58be4347cded39bf536a073b50f518c83f4f7264a1c88d"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/test_util.h",
+      "sha256": "9d7492a76621d2ae3c5715dbf9c2459ad5953d00f3b0a1f78b22932d3cb8404f"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/programs/tgetopt.c",
+      "sha256": "f0b431cf7151b48ec6f4b80583289d055828e8339decc39855f7ca3569750e50"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/android_build.sh",
+      "sha256": "a3a1d7f0deaf112c8515ec433987f07f1f004e0b2ed14f392dd01488d67bbe98"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/android_tests.sh",
+      "sha256": "e52f24db8be9806707542af87951d1bb05aaf3de910cc0d61233c195a6c5fd98"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/benchmark.sh",
+      "sha256": "0d84aa84c9cbefc60f3ae63a96c9de9a860998c708cdb8ee298a7a5883a0ed2f"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/checksum.sh",
+      "sha256": "f524e4b835248018c9348eebcfbac4a3d3ab17577f1416feb8c037dcc8a7f532"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/checksum_benchmarks.sh",
+      "sha256": "40aff1623da514690b4067a26e788e38f4c8e3f83e81ae433168185079382cf8"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/cmake-helper.sh",
+      "sha256": "a07ffaf93bb6baa3341a5d98a4b843f411bb1d51a1a2c89c38858d53f0bf6c6e"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/deflate_benchmarks.sh",
+      "sha256": "cabd1668926b82ae68a1c7c27f7cc1cf0acfc8cd8b073c5617e32811af3ab1f2"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/exec_tests.sh",
+      "sha256": "eed8b2d759c0985e0a5acfc64f9cf8a1b0c112368852a0fad3d4eeec0c14986b"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/gen-release-archives.sh",
+      "sha256": "0dce48b41de86520d97195197777595f008a0297529c8e0c512eac55e6b74c2a"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/gzip_tests.sh",
+      "sha256": "0bbbae7e8010cc75031d0d70370a93ecacda703bf22770a4c4d64b3c36a2d930"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/libFuzzer/deflate_compress/fuzz.c",
+      "sha256": "8e102da541fd208d55bb6399695fc9869a167354c8bc8ebc83e2ded44a4b2ac0"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/libFuzzer/deflate_decompress/fuzz.c",
+      "sha256": "4dc1ecedeaff66e79ff9eb7674578568a02c85571f343efbd0e0acbbe27158b1"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/libFuzzer/fuzz.sh",
+      "sha256": "da1683fc02f34ffee380c7f2b2facb78bbb5ebdcd1f2933131d5669a0df6bef0"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/libFuzzer/gzip_decompress/fuzz.c",
+      "sha256": "ca864c4b3569a455df6cd878760fd918f4d2bd3b23531a3b655f7f149eaee4c9"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/libFuzzer/zlib_decompress/fuzz.c",
+      "sha256": "30d6eae5044df480d3a2e33d2e526333b0677fb7b652ea2752fa71e70415560f"
+    },
+    {
+      "path": "crates/rfvp/vendor/libdeflate/scripts/run_tests.sh",
+      "sha256": "46d0eecd6eac84a2426d21feb696a3bbc45d20a1e262316ed09f48967520c3d7"
+    },
+    {
+      "path": "crates/rfvp/vendor/rfvp_psv_pixels.c",
+      "sha256": "6f4f83615a2aecaed0f120bc7b6535f3c961c35f0a5d222450e3c1e19d84c8f5"
+    },
+    {
+      "path": "platform/vita/host/Cargo.toml",
+      "sha256": "7a0b05a05c5b1fd35e9a6fe7d293a6a3863f9b3fe74bf2ac03c9db8a029ff50b"
+    },
+    {
+      "path": "platform/vita/host/build.rs",
+      "sha256": "e6203d858991ca515e64fc458530910f3083cff06a748c6b70199be134314f56"
+    },
+    {
+      "path": "platform/vita/host/c/rfvp_psv_gpu.c",
+      "sha256": "252c802f2b7cdd68d33b0b036ff47e96bc3e21cd5418c788a80d89728c597694"
+    },
+    {
+      "path": "platform/vita/host/c/rfvp_psv_vitasdk.c",
+      "sha256": "bf2d5d917b9507caab21cb338cf6895a1d1c7111a0b8524acdc03fee3fa7909a"
+    },
+    {
+      "path": "platform/vita/host/src/audio.rs",
+      "sha256": "1d75e244c926f849cb72377c46a4c5e8c14cf8d2456fa069cba8bbfa72188e26"
+    },
+    {
+      "path": "platform/vita/host/src/diagnostics.rs",
+      "sha256": "3d39f59453a0be9f45284f8fa34aa3e721bda794d33ada09267f0edc4dc74fac"
+    },
+    {
+      "path": "platform/vita/host/src/downscale.rs",
+      "sha256": "4251593f2297aae128bbb788821b37a1ccbef53a93eb0398545a1a90235a4395"
+    },
+    {
+      "path": "platform/vita/host/src/lib.rs",
+      "sha256": "f19f1a6adb0c5a951983a8926fbaab980e6b5d070528074845028c21e63562f6"
+    },
+    {
+      "path": "platform/vita/host/src/main.rs",
+      "sha256": "2dffef249b6dccb8843a131bfa51a47cd023e6cbcd23b4aee409d312ee89391d"
+    },
+    {
+      "path": "platform/vita/host/src/render.rs",
+      "sha256": "bfc00b5eaeefa8430af21fde370bed5161fdb59ae182def4cafbec96411c1be7"
+    },
+    {
+      "path": "platform/vita/host/src/texture_policy.rs",
+      "sha256": "79f2af327d0badc1b0f2b85215caaaede2ed46d54c475a3e478d9c8293b1846a"
+    },
+    {
+      "path": "platform/vita/host/src/thumbnail.rs",
+      "sha256": "977ed70bb2a135c972d7e082251a69906d4ac7576037f8f8d7d5a5d5b5c2b593"
+    }
+  ],
+  "verification": "Vita cross compile, VPK CRC/SELF/SFO/build marker/source hashes checked; no new implementation or game regression tests run",
+  "hardware_feedback": "User confirmed v17 on a real PSV with no issues; feedback did not enumerate games or individual features",
+  "feedback_date": "2026-10-22",
+  "vendor": "libdeflate 1.26, commit 92e6a0db9fa848d742f9eb286c92afc60f2c3dda; original MIT license retained"
+}

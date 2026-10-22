@@ -298,6 +298,19 @@ impl RfvpCore {
             return Err(RfvpError::InvalidArgument);
         }
 
+        let mut boot = boot;
+        let game_config = if host.fs().exists("game.toml") {
+            let result = (|| -> anyhow::Result<crate::game_config::GameConfig> {
+                let mut file = host.fs().open("game.toml").map_err(|e| anyhow::anyhow!("open game.toml: {e:?}"))?;
+                let bytes = file.read_to_vec(64 * 1024).map_err(|e| anyhow::anyhow!("read game.toml: {e:?}"))?;
+                crate::game_config::GameConfig::parse(&bytes)
+            })();
+            result.map_err(|e| { self.last_error_detail = Some(e.to_string()); RfvpError::InvalidData })?
+        } else { crate::game_config::GameConfig::default() };
+        if let Some(nls) = game_config.nls { boot.nls = nls; }
+        host.log(RfvpLogLevel::Info, &format!("game config hcb={:?} nls={:?} text_patch={:?} text_nls={:?} asset_aliases={:?}",
+            game_config.hcb, boot.nls, game_config.text_patch, game_config.text_nls, game_config.asset_aliases));
+
         host.log(
             RfvpLogLevel::Info,
             "rfvp no_std boot: scanning asset root for HCB",
@@ -310,6 +323,7 @@ impl RfvpCore {
                 boot.asset_root,
                 boot.hcb_extension,
                 boot.max_manifest_entries,
+                game_config.hcb.as_deref(),
             )?;
             let mut file = host.fs().open(&path)?;
             let len = file.len()?;
@@ -352,6 +366,7 @@ impl RfvpCore {
                 boot.hcb_extension,
                 boot.max_hcb_bytes,
                 boot.max_manifest_entries,
+                game_config.hcb.as_deref(),
             )?;
             let parser = Parser::from_bytes(hcb.bytes.clone(), boot.nls).map_err(|err| {
                 self.last_error_detail = Some(err.to_string());
@@ -359,6 +374,32 @@ impl RfvpCore {
             })?;
             (hcb, hcb_manifest, parser)
         };
+        // CRC binding prevents an offset translation from being used with a
+        // different edition of the script. Read only, performed once at boot.
+        if let Some(expected) = game_config.hcb_crc32 {
+            #[cfg(not(feature = "old_school"))]
+            let actual = crate::game_config::crc32(&hcb.bytes);
+            #[cfg(feature = "old_school")]
+            let actual = {
+                let mut file = host.fs().open(&hcb.path)?;
+                let bytes = file.read_to_vec(boot.max_hcb_bytes)?;
+                crate::game_config::crc32(&bytes)
+            };
+            if actual != expected {
+                self.last_error_detail = Some(format!("game.toml HCB CRC32 mismatch: expected {expected:08x}, got {actual:08x}"));
+                return Err(RfvpError::InvalidData);
+            }
+        }
+        let mut parser = parser;
+        if let Some(path) = game_config.text_patch.as_deref() {
+            let mut file = host.fs().open(path).map_err(|err| {
+                self.last_error_detail = Some(format!("cannot open text_patch {path}: {err:?}")); err
+            })?;
+            let bytes = file.read_to_vec(16 * 1024 * 1024)?;
+            parser.load_text_patch(bytes, game_config.text_nls.unwrap()).map_err(|e| {
+                self.last_error_detail = Some(format!("text_patch {path}: {e}")); RfvpError::InvalidData
+            })?;
+        }
         #[cfg(feature = "old_school")]
         let old_school_scale = load_required_old_school_scale(host).map_err(|(err, detail)| {
             self.last_error_detail = Some(detail);
@@ -388,6 +429,15 @@ impl RfvpCore {
         #[cfg(feature = "psx")]
         host.log(RfvpLogLevel::Debug, "boot: before packs");
         let mut vfs = build_host_vfs(host, boot)?;
+        if let Some(path) = game_config.asset_aliases.as_deref() {
+            let mut file = host.fs().open(path)?;
+            let bytes = file.read_to_vec(1024 * 1024)?;
+            let text = core::str::from_utf8(&bytes).map_err(|_| RfvpError::InvalidData)?;
+            let aliases = vfs.load_aliases(text).map_err(|e| {
+                self.last_error_detail = Some(format!("asset_aliases {path}: {e}")); RfvpError::InvalidData
+            })?;
+            host.log(RfvpLogLevel::Info, &format!("asset aliases loaded count={aliases}"));
+        }
         #[cfg(not(feature = "old_school"))]
         vfs.add_loose_file(&hcb.path, hcb.bytes.clone());
 
@@ -639,30 +689,36 @@ impl RfvpCore {
                 Ok(())
             });
         #[cfg(not(feature = "psx"))]
-        let snap = crate::subsystem::save_state::SaveStateSnapshotV1::capture(&mut self.game_data);
+        let snap = {
+            let _timing = crate::perf::scope(32);
+            crate::subsystem::save_state::SaveStateSnapshotV1::capture(&mut self.game_data)
+        };
 
         #[cfg(not(feature = "psx"))]
-        let result = if slot == u32::MAX {
-            // SaveCreate(3, ..): prepare the payload in memory, and commit it if SaveWrite has
-            // already named a slot.
-            self.game_data
-                .save_manager
-                .finalize_local_savedata_prepare(nls.clone(), thumb_w, thumb_h, &thumb, Some(&snap))
-                .and_then(|()| {
-                    if self.game_data.save_manager.try_commit_local_savedata(nls)? {
+        let result = {
+            let _timing = crate::perf::scope(33);
+            if slot == u32::MAX {
+                // SaveCreate(3, ..): prepare the payload in memory, and commit it if SaveWrite
+                // has already named a slot.
+                self.game_data
+                    .save_manager
+                    .finalize_local_savedata_prepare(nls.clone(), thumb_w, thumb_h, &thumb, Some(&snap))
+                    .and_then(|()| {
+                        if self.game_data.save_manager.try_commit_local_savedata(nls)? {
+                            self.game_data.save_manager.consume_save_write_result();
+                            self.save_global_if_changed(host);
+                        }
+                        Ok(())
+                    })
+            } else {
+                self.game_data
+                    .save_manager
+                    .finalize_save_write(nls, thumb_w, thumb_h, &thumb, Some(&snap))
+                    .map(|()| {
                         self.game_data.save_manager.consume_save_write_result();
                         self.save_global_if_changed(host);
-                    }
-                    Ok(())
-                })
-        } else {
-            self.game_data
-                .save_manager
-                .finalize_save_write(nls, thumb_w, thumb_h, &thumb, Some(&snap))
-                .map(|()| {
-                    self.game_data.save_manager.consume_save_write_result();
-                    self.save_global_if_changed(host);
-                })
+                    })
+            }
         };
         if let Err(err) = result {
             host.log(RfvpLogLevel::Error, &format!("could not save: {err:#}"));
@@ -781,7 +837,8 @@ impl RfvpCore {
         let mut commands = Vec::new();
         self.game_data.audio_manager().drain_commands(&mut commands);
         for command in commands {
-            crate::perf::mark(1000 + audio_command_index(&command));
+            let command_index = audio_command_index(&command);
+            crate::perf::mark(1000 + command_index);
             let result = match command {
                 crate::rfvp_audio::AudioCommand::LoadEncoded { id, kind, bytes } => {
                     host.audio().load_encoded(id, kind, &bytes)
@@ -831,7 +888,7 @@ impl RfvpCore {
                 }
             };
             if let Err(err) = result {
-                log::warn!("audio command failed: {err:?}");
+                log::warn!("audio command {command_index} failed: {err:?}");
             }
         }
         Ok(())
@@ -1020,7 +1077,14 @@ fn find_and_load_hcb<H: RfvpHost>(
     extension: &str,
     max_hcb_bytes: usize,
     max_manifest_entries: usize,
+    selected_path: Option<&str>,
 ) -> RfvpResult<(LoadedHcb, Vec<(String, RfvpFileInfo)>)> {
+    if let Some(path) = selected_path {
+        let mut file = host.fs().open(path)?;
+        let info = RfvpFileInfo::file(file.len()?);
+        let bytes = file.read_to_vec(max_hcb_bytes)?;
+        return Ok((LoadedHcb { path: path.to_string(), bytes, info }, Vec::new()));
+    }
     let mut found = Vec::new();
     {
         let visitor = &mut |path: &str, info: RfvpFileInfo| -> RfvpResult<()> {
@@ -1047,7 +1111,12 @@ fn find_hcb_info<H: RfvpHost>(
     root: &str,
     extension: &str,
     max_manifest_entries: usize,
+    selected_path: Option<&str>,
 ) -> RfvpResult<(String, RfvpFileInfo, Vec<(String, RfvpFileInfo)>)> {
+    if let Some(path) = selected_path {
+        let mut file = host.fs().open(path)?;
+        return Ok((path.to_string(), RfvpFileInfo::file(file.len()?), Vec::new()));
+    }
     let mut found = Vec::new();
     {
         let visitor = &mut |path: &str, info: RfvpFileInfo| -> RfvpResult<()> {

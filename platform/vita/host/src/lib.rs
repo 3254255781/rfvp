@@ -9,12 +9,15 @@ pub mod allocator;
 pub mod app;
 pub mod audio;
 pub mod clock;
+pub mod downscale;
 pub mod event;
 pub mod fs;
 pub mod host;
 pub mod raw;
 pub mod render;
 pub mod status;
+pub mod texture_policy;
+pub mod thumbnail;
 
 pub use app::PsvApp;
 pub use audio::PsvAudio;

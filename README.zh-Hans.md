@@ -1,3 +1,5 @@
+> PSV 第十七版：实机反馈、性能优化、配置式中文支持及安装包见 [PSV_V17.md](PSV_V17.md)。
+
 # rfvp: FVP 引擎与 IDE 的非官方 Rust 跨平台实现
 
 <p align="center">

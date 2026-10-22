@@ -27,21 +27,17 @@ pub fn parts_load(game_data: &mut GameData, id: &Variant, path: &Variant) -> Res
         return Ok(Variant::Nil);
     }
 
-    // Prepare the action first (avoid holding a mutable borrow of game_data while doing VFS I/O).
+    // Keep the path until the manager has checked its bounded decoded-parts cache.
     enum Action {
         Noop,
         Unload,
-        Load { path: String, buff: Vec<u8> },
+        Load { path: String },
     }
 
     let action = match path {
         Variant::Nil => Action::Unload,
-        Variant::String(p) | Variant::ConstString(p, _) => match game_data.vfs_load_file(p) {
-            Ok(buff) => Action::Load {
-                path: p.to_string(),
-                buff,
-            },
-            Err(_) => Action::Noop,
+        Variant::String(p) | Variant::ConstString(p, _) => Action::Load {
+            path: p.to_string(),
         },
         _ => Action::Noop,
     };
@@ -54,8 +50,10 @@ pub fn parts_load(game_data: &mut GameData, id: &Variant, path: &Variant) -> Res
             Action::Unload => {
                 pm.unload_parts_keep_name(id as u8);
             }
-            Action::Load { path, buff } => {
-                let _ = pm.load_parts(id as u16, &path, buff);
+            Action::Load { path } => {
+                if let Err(err) = pm.load_parts_named(id as u16, &path, &game_data.vfs) {
+                    crate::perf::event(format_args!("parts load FAILED id={id} path={path:?}: {err:?}"));
+                }
             }
         }
         pm.next_free_id(id as u8);
@@ -121,7 +119,7 @@ pub fn parts_select(game_data: &mut GameData, id: &Variant, entry_id: &Variant) 
                 .draw_parts_to_texture(id as u8, entry_id_u32, &game_data.vfs)
             {
                 // IDA: draw failure is non-fatal; still cancels the motion slot.
-                let _ = e;
+                crate::perf::event(format_args!("parts select FAILED id={id} entry={entry_id_u32}: {e:?}"));
             }
         }
     }

@@ -116,7 +116,7 @@ pub fn audio_stop(
 
 /// Silence audio on a specific channel (BGM).
 ///
-/// This implements the engine's `AudioSilentOn` semantics: once enabled, the channel remains muted.
+/// The channel is silenced until the next successful AudioPlay, which clears the state.
 pub fn audio_silent_on(game_data: &mut GameData, channel: &Variant) -> Result<Variant> {
     let channel = match channel {
         Variant::Int(channel) => *channel,
@@ -377,7 +377,7 @@ pub fn sound_play(
 
 /// Silence sound on a specific channel (SE).
 ///
-/// This implements the engine's `SoundSilentOn` semantics: once enabled, the channel remains muted.
+/// The current playback is silenced; starting playback again clears that state.
 pub fn sound_silent_on(game_data: &mut GameData, channel: &Variant) -> Result<Variant> {
     let channel = match channel {
         Variant::Int(channel) => *channel,

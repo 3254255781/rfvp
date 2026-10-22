@@ -1,3 +1,5 @@
+> PS Vita v17 snapshot: see [PSV_V17.md](PSV_V17.md) for hardware feedback, performance changes, game configuration and the VPK.
+
 # rfvp: A Non-Official Rust cross-platform implementation of the FVP engine and IDE.
 
 <p align="center">

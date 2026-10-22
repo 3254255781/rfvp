@@ -83,6 +83,8 @@ pub struct Parser {
     pub buffer: Arc<Vec<u8>>,
     #[cfg(feature = "old_school")]
     source: Box<dyn HcbByteSource>,
+    #[cfg(feature = "no_std")]
+    text_patch: Option<super::text_patch::TextPatch>,
     pub nls: Nls,
     pub sys_desc_offset: u32,
     /// entry point (offset) of the script
@@ -124,6 +126,8 @@ impl Parser {
             uefi_parser_stage!("[UEFI] Parser::from_bytes after Arc::new");
             let mut parser = Parser {
                 buffer,
+                #[cfg(feature = "no_std")]
+                text_patch: None,
                 nls,
                 sys_desc_offset: 0,
                 entry_point: 0,
@@ -166,6 +170,8 @@ impl Parser {
     fn from_source(source: Box<dyn HcbByteSource>, nls: Nls) -> Result<Self> {
         let mut parser = Parser {
             source,
+            #[cfg(feature = "no_std")]
+            text_patch: None,
             nls,
             sys_desc_offset: 0,
             entry_point: 0,
@@ -323,6 +329,10 @@ impl Parser {
     /// (with null terminator)
     /// then convert it to a UTF-8 string due to the NLS
     pub fn read_cstring(&self, offset: usize, len: usize) -> Result<String> {
+        #[cfg(feature = "no_std")]
+        if let Some(text) = self.text_patch.as_ref().and_then(|patch| patch.lookup(offset)) {
+            return Ok(text);
+        }
         #[cfg(feature = "old_school")]
         {
             if offset
@@ -361,6 +371,12 @@ impl Parser {
 
             self.decode_string_bytes(&string)
         }
+    }
+
+    #[cfg(feature = "no_std")]
+    pub(crate) fn load_text_patch(&mut self, bytes: Vec<u8>, nls: Nls) -> Result<()> {
+        self.text_patch = Some(super::text_patch::TextPatch::parse(bytes, nls, self)?);
+        Ok(())
     }
 
     fn decode_string_bytes(&self, string: &[u8]) -> Result<String> {

@@ -182,9 +182,24 @@ impl<const N: usize> Channels<N> {
             return Ok(());
         }
         log::info!("Playing {} slot {slot}", self.label);
+        // Memoria's AudioSilentOn sets the channel's +0x14 byte; AudioPlay clears it
+        // (0x433858 / 0x43c322 in the original engine). Silence applies to the current
+        // playback, not every later sound loaded into this slot. Category volume still applies.
+        if self.muted[slot] {
+            crate::perf::event(format_args!("audio play clears transient silence label={} slot={slot}", self.label));
+        }
+        self.muted[slot] = false;
+        let params = self.params(slot);
+        if params.volume == 0.0 {
+            let type_volume = self.kinds[slot]
+                .and_then(|kind| usize::try_from(kind).ok())
+                .and_then(|kind| self.type_volumes.get(kind)).copied().unwrap_or(1.0);
+            crate::perf::event(format_args!("ZERO audio gain label={} slot={slot} path={:?} muted={} slot_volume={} type={:?} type_volume={type_volume}",
+                self.label, self.names[slot], self.muted[slot], self.volumes[slot], self.kinds[slot]));
+        }
         self.audio
             .backend()
-            .play(self.id(slot), self.params(slot), fade_in, vfs)
+            .play(self.id(slot), params, fade_in, vfs)
     }
 
     pub fn set_volume(&mut self, slot: i32, volume: f32, tween: Tween) {
@@ -199,9 +214,10 @@ impl<const N: usize> Channels<N> {
         self.apply_params(slot, tween);
     }
 
-    /// Permanently silence a slot (`AudioSilentOn` / `SoundSilentOn`).
+    /// Silence the current playback; starting another playback clears this transient state.
     pub fn silent_on(&mut self, slot: i32, tween: Tween) {
         let Ok(slot) = self.slot(slot) else { return };
+        crate::perf::event(format_args!("audio silent_on label={} slot={slot}", self.label));
         self.muted[slot] = true;
         self.apply_params(slot, tween);
     }
@@ -239,6 +255,7 @@ impl<const N: usize> Channels<N> {
             return;
         }
         self.type_volumes[kind as usize] = volume;
+        crate::perf::event(format_args!("audio type_volume label={} type={kind} volume={volume}", self.label));
         for slot in 0..N {
             if self.kinds[slot] == Some(kind) {
                 self.apply_params(slot, tween);
@@ -285,14 +302,22 @@ impl<const N: usize> Channels<N> {
 
     /// Replace every slot with the saved ones.
     pub fn restore(&mut self, saved: impl IntoIterator<Item = SlotState>, vfs: &Vfs) -> Result<()> {
+        let saved: Vec<SlotState> = saved.into_iter().collect();
         for slot in 0..N {
+            // PSV's mixer keeps loaded bytes independently of the playing voice.
+            // Stop + Play opens a fresh decoder at the beginning, so retaining the
+            // same slot/source avoids re-reading megabytes without resuming old audio.
+            let keep_source = cfg!(target_os = "vita") && saved.iter().any(|state| {
+                state.slot == slot && matches!((&self.sources[slot], &state.path),
+                    (Some(SoundSource::Named(current)), Some(path)) if current == path)
+            });
             self.audio.backend().stop(self.id(slot), Tween::default());
-            if self.sources[slot].take().is_some() {
+            if !keep_source && self.sources[slot].take().is_some() {
                 self.audio.backend().unload(self.id(slot));
             }
             self.released[slot] = false;
             self.kinds[slot] = None;
-            self.names[slot] = None;
+            if !keep_source { self.names[slot] = None; }
             self.muted[slot] = false;
             self.volumes[slot] = 1.0;
             self.repeat[slot] = false;
@@ -310,7 +335,14 @@ impl<const N: usize> Channels<N> {
             self.repeat[slot] = state.repeat;
             self.pan[slot] = state.pan as f64;
             if let Some(path) = state.path {
-                self.load_named(slot as i32, path, vfs)?;
+                let reuse = cfg!(target_os = "vita") && matches!(&self.sources[slot],
+                    Some(SoundSource::Named(current)) if current == &path);
+                if reuse {
+                    crate::perf::event(format_args!("save load reuse audio label={} slot={slot} path={path:?}", self.label));
+                    self.names[slot] = Some(path);
+                } else {
+                    self.load_named(slot as i32, path, vfs)?;
+                }
             }
             if state.playing && self.is_loaded(slot) {
                 self.play(
@@ -324,5 +356,69 @@ impl<const N: usize> Channels<N> {
             }
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use alloc::{boxed::Box, vec};
+    use crate::rfvp_audio::{AudioCommand, CommandBackend};
+    use crate::script::parser::Nls;
+
+    fn bank() -> (Channels<4>, Arc<AudioManager>, Vfs) {
+        let audio = Arc::new(AudioManager::with_backend(Box::new(CommandBackend::new())));
+        let channels = Channels::new(audio.clone(), "BGM", |slot| AudioStreamId(slot as u32));
+        (channels, audio, Vfs::new(Nls::ShiftJIS).unwrap())
+    }
+
+    fn latest_play(audio: &AudioManager) -> AudioParams {
+        let mut commands = Vec::new();
+        audio.drain_commands(&mut commands);
+        commands.into_iter().rev().find_map(|command| match command {
+            AudioCommand::Play { params, .. } => Some(params),
+            _ => None,
+        }).expect("expected a play command")
+    }
+
+    #[test]
+    fn next_voice_clears_previous_transient_silence() {
+        let (mut channels, audio, vfs) = bank();
+        channels.load(3, vec![1], &vfs).unwrap();
+        channels.play(3, false, 1.0, 0.5, Tween::default(), &vfs).unwrap();
+        assert_eq!(latest_play(&audio).volume, 1.0);
+        channels.silent_on(3, Tween::default());
+        assert!(channels.muted[3]);
+        assert_eq!(channels.params(3).volume, 0.0);
+        channels.load(3, vec![2], &vfs).unwrap();
+        channels.play(3, false, 1.0, 0.5, Tween::default(), &vfs).unwrap();
+        assert!(!channels.muted[3]);
+        assert_eq!(latest_play(&audio).volume, 1.0);
+    }
+
+    #[test]
+    fn replay_clears_silence_but_keeps_category_gain_and_other_slots() {
+        let (mut channels, audio, vfs) = bank();
+        channels.load(3, vec![1], &vfs).unwrap();
+        channels.set_type(3, 0);
+        channels.set_type_volume(0, 0.35, Tween::default());
+        channels.silent_on(1, Tween::default());
+        channels.silent_on(3, Tween::default());
+        channels.play(3, false, 0.8, 0.5, Tween::default(), &vfs).unwrap();
+        assert!((latest_play(&audio).volume - 0.28).abs() < 0.0001);
+        assert!(channels.muted[1]);
+        assert!(!channels.muted[3]);
+    }
+
+    #[test]
+    fn explicit_category_mute_stays_silent_on_new_play() {
+        let (mut channels, audio, vfs) = bank();
+        channels.load(3, vec![1], &vfs).unwrap();
+        channels.set_type(3, 0);
+        channels.set_type_volume(0, 0.0, Tween::default());
+        channels.silent_on(3, Tween::default());
+        channels.play(3, false, 1.0, 0.5, Tween::default(), &vfs).unwrap();
+        assert!(!channels.muted[3]);
+        assert_eq!(latest_play(&audio).volume, 0.0);
     }
 }
